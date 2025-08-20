@@ -1,0 +1,43 @@
+# Source files
+src/
+scripts/
+
+# Development files
+tsconfig.json
+*.ts
+!dist/**/*.d.ts
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Node modules (automatically excluded by npm)
+node_modules/
+
+# Lock files (keep package-lock.json out of npm package)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# Build artifacts that shouldn't be published
+*.map
+
+# Temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp

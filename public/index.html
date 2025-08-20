@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCheckpoint - Claude Code Checkpoint Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-light: #111111;
+      --surface: #1a1a1a;
+      --text: #ffffff;
+      --text-muted: #cccccc;
+      --text-dim: #888888;
+      --border: #333333;
+      --delete: #ff4444;
+      --delete-hover: #ff6666;
+      --radius: 4px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 0;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      transition: opacity 0.2s;
+    }
+    
+    .logo:hover {
+      opacity: 0.8;
+    }
+
+    .logo-icon {
+      background: var(--text);
+      color: var(--bg);
+      border-radius: var(--radius);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 11px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text);
+    }
+
+    .status-dot.disconnected {
+      background: var(--text-dim);
+    }
+
+    /* Breadcrumb Navigation */
+    .breadcrumb {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .breadcrumb-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .breadcrumb-item.active {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .breadcrumb-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb-link:hover {
+      color: var(--text);
+    }
+
+    .breadcrumb-separator {
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    /* Main Container */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .page-title-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 8px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+      font-size: 12px;
+    }
+
+    .back-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .back-btn.show {
+      display: block;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 600px;
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .btn:hover {
+      background: var(--bg-light);
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    .btn-primary:hover {
+      background: var(--text-muted);
+      border-color: var(--text-muted);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-light);
+    }
+
+    .btn-danger {
+      background: var(--delete);
+      color: white;
+      border-color: var(--delete);
+    }
+
+    .btn-danger:hover {
+      background: var(--delete-hover);
+      border-color: var(--delete-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table thead th {
+      background: var(--bg-light);
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .table tbody td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      font-size: 13px;
+    }
+
+    .table-row {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .table-row:hover {
+      background: var(--bg-light);
+    }
+
+    .table-row:last-child td {
+      border-bottom: none;
+    }
+
+    .row-number {
+      width: 50px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Project Table */
+    .project-info {
+      min-width: 200px;
+    }
+
+    .project-name {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+
+    .project-path {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: monospace;
+    }
+
+    .project-checkpoints {
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .project-last-checkpoint {
+      font-size: 12px;
+      color: var(--text-muted);
+      min-width: 100px;
+    }
+
+    .project-actions-cell,
+    .checkpoint-actions-cell {
+      width: 80px;
+      text-align: right;
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .time-ago {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius);
+      transition: all 0.2s;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background: var(--delete);
+      color: white;
+    }
+
+    .delete-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      transition: all 0.2s;
+      font-size: 11px;
+    }
+
+    /* Checkpoint Table */
+    .checkpoint-message {
+      font-weight: 500;
+      color: var(--text);
+      min-width: 250px;
+      font-size: 13px;
+    }
+
+    .checkpoint-stats {
+      display: flex;
+      gap: 12px;
+    }
+
+    .checkpoint-time {
+      color: var(--text-muted);
+      font-size: 12px;
+      min-width: 100px;
+    }
+
+    /* Files Table */
+    .file-path {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
+      min-width: 200px;
+    }
+
+    .file-info {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .file-size {
+      font-weight: 500;
+    }
+
+    .file-modified {
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    /* Empty States */
+    .empty-row {
+      text-align: center;
+      padding: 40px 16px !important;
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .empty-subtext {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    /* Info Grid */
+    .info-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .info-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-value {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .user-prompt {
+      background: var(--bg-light);
+      padding: 12px;
+      border-radius: var(--radius);
+      border-left: 2px solid var(--text);
+      font-family: inherit;
+      line-height: 1.4;
+      font-size: 13px;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Split Layout for Checkpoints View */
+    .split-layout {
+      display: flex;
+      gap: 16px;
+      height: calc(100vh - 200px);
+      min-height: 600px;
+    }
+
+    .split-left {
+      flex: 0 0 25%;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .split-right {
+      flex: 0 0 75%;
+      min-width: 400px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .split-left .table-container {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Compact table for split view */
+    .split-left .table tbody td {
+      padding: 8px 12px;
+    }
+
+    .split-left .checkpoint-message {
+      font-size: 12px;
+      min-width: 180px;
+    }
+
+    .split-left .checkpoint-stats {
+      display: none; /* Hide stats in compact view */
+    }
+    
+    .split-left th.checkpoint-stats {
+      display: none; /* Hide stats header in compact view */
+    }
+
+    .split-left .checkpoint-time {
+      font-size: 11px;
+      min-width: 80px;
+    }
+
+    /* Details Panel */
+    .details-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .empty-details {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-details .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-details .empty-text {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .empty-details .empty-subtext {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .details-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .details-actions {
+      display: flex;
+      gap: 8px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .details-content .info-section {
+      margin-bottom: 0;
+    }
+
+    .details-content .info-section:last-child {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .details-content .info-section:last-child .table-container {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Selected row highlighting */
+    .table-row.selected {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-left: 3px solid var(--text);
+    }
+
+    /* Disabled checkpoint styling */
+    .table-row.disabled-checkpoint {
+      opacity: 0.6 !important;
+      cursor: not-allowed !important;
+      color: #ff6b6b !important;
+      pointer-events: none;
+    }
+
+    .table-row.disabled-checkpoint:hover {
+      background: transparent !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .split-layout {
+        flex-direction: column;
+        height: auto;
+        min-height: auto;
+      }
+      
+      .split-left {
+        flex: 0 0 auto;
+        min-width: auto;
+        max-height: 400px;
+      }
+      
+      .split-right {
+        flex: 0 0 auto;
+        min-width: auto;
+        min-height: 500px;
+      }
+      
+      .split-left .checkpoint-stats {
+        display: flex; /* Show stats on mobile */
+      }
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 90vw;
+      max-width: 90vw;
+      max-height: 90vh;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal.diff-modal {
+      max-width: 90vw !important;
+      width: 90vw !important;
+      min-width: 90vw !important;
+      height: 80vh !important;
+      max-height: 80vh !important;
+    }
+
+    /* GitHub-style Diff Interface */
+    .diff-container {
+      display: flex;
+      flex: 1;
+      height: calc(80vh - 140px); /* Modal height minus header/actions */
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .diff-sidebar {
+      width: 300px;
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-files-header {
+      padding: 1rem;
+      font-weight: 600;
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .diff-files-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .diff-file-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background-color 0.2s;
+    }
+
+    .diff-file-item:hover {
+      background: var(--bg-light);
+    }
+
+    .diff-file-item.active {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-left: 3px solid var(--text) !important;
+      font-weight: 600;
+    }
+
+    /* Color-coded file changes */
+    .diff-file-item.added {
+      border-left: 3px solid #2ea043;
+    }
+
+    .diff-file-item.added:hover {
+      background: rgba(46, 160, 67, 0.1);
+    }
+
+    .diff-file-item.deleted {
+      border-left: 3px solid #f85149;
+    }
+
+    .diff-file-item.deleted:hover {
+      background: rgba(248, 81, 73, 0.1);
+    }
+
+    .diff-file-item.modified {
+      border-left: 3px solid #1f6feb;
+    }
+
+    .diff-file-item.modified:hover {
+      background: rgba(31, 111, 235, 0.1);
+    }
+
+    .diff-file-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed !important;
+      pointer-events: none;
+    }
+
+    /* Badge colors */
+    .added-badge {
+      color: #2ea043;
+      background: rgba(46, 160, 67, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .deleted-badge {
+      color: #f85149;
+      background: rgba(248, 81, 73, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .modified-badge {
+      color: #1f6feb;
+      background: rgba(31, 111, 235, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .diff-file-icon {
+      margin-right: 0.5rem;
+      font-size: 16px;
+    }
+
+    .diff-file-name {
+      flex: 1;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .diff-file-changes {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      background: var(--bg-light);
+      color: var(--text-muted);
+    }
+
+    .diff-content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #diff-file-content {
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .single-file-diff {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: var(--bg-light);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .file-path {
+      font-family: monospace;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .file-status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .file-status.added {
+      background: rgba(46, 160, 67, 0.1);
+      color: #2ea043;
+    }
+
+    .file-status.deleted {
+      background: rgba(248, 81, 73, 0.1);
+      color: #f85149;
+    }
+
+    .file-status.modified {
+      background: rgba(255, 193, 7, 0.1);
+      color: #ffc107;
+    }
+
+    .file-diff-content {
+      flex: 1;
+      overflow-y: auto;
+      font-family: 'SFMono-Regular', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      min-height: 0;
+    }
+
+    .github-diff {
+      height: 100%;
+    }
+
+    .diff-lines {
+      width: 100%;
+    }
+
+    .diff-line {
+      display: flex;
+      align-items: flex-start;
+      min-height: 20px;
+      line-height: 20px;
+      border-left: 4px solid transparent;
+    }
+
+    .diff-line.added-line {
+      background: rgba(46, 160, 67, 0.15);
+      border-left-color: #2ea043;
+    }
+
+    .diff-line.deleted-line {
+      background: rgba(248, 81, 73, 0.15);
+      border-left-color: #f85149;
+    }
+
+    .diff-line.context-line {
+      background: transparent;
+    }
+
+    .diff-line.hunk-header {
+      background: rgba(84, 174, 255, 0.1);
+      color: #54aeff;
+      font-weight: 600;
+      border-left-color: #54aeff;
+    }
+
+    .line-number {
+      display: inline-block;
+      padding: 0 8px;
+      text-align: right;
+      background: rgba(0, 0, 0, 0.1);
+      color: var(--text-muted);
+      user-select: none;
+      width: 40px;
+      flex-shrink: 0;
+      font-size: 12px;
+      border-right: 1px solid var(--border);
+    }
+
+    .line-marker {
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+      padding: 0 4px;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    .line-marker.added {
+      color: #2ea043;
+    }
+
+    .line-marker.deleted {
+      color: #f85149;
+    }
+
+    .line-content {
+      flex: 1;
+      padding: 0 8px;
+      white-space: pre;
+      font-family: 'SFMono-Regular', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+      overflow-x: auto;
+    }
+
+    .hunk-info {
+      background: rgba(84, 174, 255, 0.1);
+      color: #54aeff;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 600;
+      border-left: 4px solid #54aeff;
+      margin: 8px 0;
+    }
+
+    .no-file-selected {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .diff-summary {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: normal;
+      margin-left: 1rem;
+    }
+
+    .modal-header {
+      flex-shrink: 0;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .modal-content {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .modal-actions {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      padding: 1rem 1.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-light);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 1001;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      min-width: 300px;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.success {
+      border-left: 4px solid #22c55e;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .toast.info {
+      border-left: 4px solid #3b82f6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .table thead {
+        display: none;
+      }
+
+      .table tbody td {
+        display: block;
+        padding: 0.5rem 1rem;
+        border: none;
+      }
+
+      .table-row {
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 1rem;
+      }
+
+      .project-stats,
+      .checkpoint-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo" onclick="app && app.showProjects()" style="cursor: pointer;">
+        <div class="logo-icon">📋</div>
+        <div class="logo-text">CCheckpoint</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button class="btn btn-danger" id="clear-all-btn" title="Clear all checkpoints from all projects">
+          🗑️ Clear All
+        </button>
+        <div class="connection-status">
+          <div class="status-dot" id="connection-status"></div>
+          <span id="connection-text">Connecting...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title-section">
+        <button class="back-btn" id="back-btn">← Back</button>
+        <div>
+          <h1 class="page-title" id="page-title">Projects</h1>
+          <div class="page-subtitle" id="page-subtitle">Select a project to view its checkpoints</div>
+        </div>
+      </div>
+      <div class="page-actions">
+        <span id="projects-count" class="btn btn-secondary">0</span>
+      </div>
+    </div>
+
+    <!-- Projects View -->
+    <div id="projects-view" class="view active">
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Project</th>
+              <th>Checkpoints</th>
+              <th>Last Checkpoint</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projects-tbody">
+            <tr>
+              <td colspan="5" class="empty-row">
+                <div class="empty-state">
+                  <div class="empty-text">Loading projects...</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Checkpoints View -->
+    <div id="checkpoints-view" class="view">
+      <div class="split-layout">
+        <!-- Left Panel: Checkpoints List -->
+        <div class="split-left">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Message</th>
+                  <th class="checkpoint-stats">Stats</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="checkpoints-tbody">
+                <tr>
+                  <td colspan="4" class="empty-row">
+                    <div class="empty-state">
+                      <div class="empty-icon">📋</div>
+                      <div class="empty-text">Loading checkpoints...</div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right Panel: Checkpoint Details -->
+        <div class="split-right">
+          <div id="checkpoint-details-panel" class="details-panel">
+            <div class="empty-details">
+              <div class="empty-icon">📄</div>
+              <div class="empty-text">Select a checkpoint to view details</div>
+              <div class="empty-subtext">Click any checkpoint from the list to see its full information</div>
+            </div>
+            
+            <!-- Checkpoint Details Content (hidden initially) -->
+            <div id="checkpoint-details-content" class="details-content" style="display: none;">
+              <!-- Action Buttons -->
+              <div class="details-actions">
+                <button class="btn btn-secondary" id="diff-btn" disabled>📊 Compare</button>
+                <button class="btn btn-primary" id="restore-btn">🔄 Restore</button>
+                <button class="btn btn-danger" id="delete-checkpoint-btn">🗑️ Delete</button>
+              </div>
+
+              <!-- Checkpoint Information -->
+              <div class="info-section">
+                <h3>📋 Checkpoint Information</h3>
+                <div id="checkpoint-info">
+                  <!-- Info will be populated here -->
+                </div>
+              </div>
+
+              <!-- Files Table -->
+              <div class="info-section">
+                <h3>📝 Changed Files</h3>
+                <div class="table-container">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>File Path</th>
+                        <th>Change Type</th>
+                        <th>Info</th>
+                      </tr>
+                    </thead>
+                    <tbody id="files-tbody">
+                      <tr>
+                        <td colspan="4" class="empty-row">
+                          <div class="empty-state">
+                            <div class="empty-icon">📄</div>
+                            <div class="empty-text">Loading files...</div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details View -->
+    <div id="details-view" class="view">
+      <!-- Action Buttons -->
+      <div class="page-actions" style="margin-bottom: 16px;">
+        <button class="btn btn-secondary" id="diff-btn" disabled>📊 Compare</button>
+        <button class="btn btn-primary" id="restore-btn">🔄 Restore</button>
+        <button class="btn btn-danger" id="delete-checkpoint-btn">🗑️ Delete</button>
+      </div>
+
+      <!-- Checkpoint Information -->
+      <div class="info-section">
+        <h3>📋 Checkpoint Information</h3>
+        <div id="checkpoint-info">
+          <!-- Info will be populated here -->
+        </div>
+      </div>
+
+      <!-- Files Table -->
+      <div class="info-section">
+        <h3>📝 Changed Files</h3>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>File Path</th>
+                <th>Change Type</th>
+                <th>Info</th>
+              </tr>
+            </thead>
+            <tbody id="files-tbody">
+              <tr>
+                <td colspan="4" class="empty-row">
+                  <div class="empty-state">
+                    <div class="empty-icon">📄</div>
+                    <div class="empty-text">Loading files...</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title">Confirm Action</div>
+      </div>
+      <div class="modal-content">
+        <p id="modal-message">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+        <button class="btn btn-danger" id="modal-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

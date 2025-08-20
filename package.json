@@ -1,0 +1,77 @@
+{
+  "name": "ccheckpoints",
+  "version": "1.0.0",
+  "description": "Checkpoint system for Claude Code CLI - Track and visualize your coding sessions with automatic checkpoint creation",
+  "main": "dist/cli.js",
+  "type": "module",
+  "bin": {
+    "ccheckpoints": "./dist/cli.js"
+  },
+  "preferGlobal": true,
+  "files": [
+    "dist/",
+    "public/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "dev": "tsx src/cli.ts",
+    "dev:watch": "tsx watch src/cli.ts",
+    "prepublishOnly": "npm run build",
+    "test": "tsx src/test/index.ts",
+    "publish:npm": "npm run build && npm publish",
+    "publish:dry": "npm run build && npm publish --dry-run"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "claude-cli",
+    "checkpoint",
+    "checkpoints",
+    "typescript",
+    "cli",
+    "tracking",
+    "session-tracking",
+    "developer-tools",
+    "productivity",
+    "coding-assistant",
+    "dashboard",
+    "visualization",
+    "hooks"
+  ],
+  "author": "Fayaz Bin Salam <p32929@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p32929/ccheckpoints.git"
+  },
+  "bugs": {
+    "url": "https://github.com/p32929/ccheckpoints/issues"
+  },
+  "homepage": "https://github.com/p32929/ccheckpoints#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "express": "^4.18.2",
+    "fast-glob": "^3.3.2",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/node": "^20.8.0",
+    "@types/sqlite3": "^3.1.9",
+    "@types/ws": "^8.5.8",
+    "rimraf": "^5.0.5",
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2"
+  }
+}

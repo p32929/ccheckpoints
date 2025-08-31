@@ -119,7 +119,7 @@ export class SetupCommand implements ICommand {
             hooks: [
               {
                 type: "command",
-                command: `${cliPath} track --event=submit`
+                command: `${cliPath} track --event=submit || echo "CCheckpoints not found. Run: npm install -g ccheckpoints@latest"`
               }
             ]
           }
@@ -129,7 +129,7 @@ export class SetupCommand implements ICommand {
             hooks: [
               {
                 type: "command", 
-                command: `${cliPath} track --event=stop`
+                command: `${cliPath} track --event=stop || echo "CCheckpoints not found. Run: npm install -g ccheckpoints@latest"`
               }
             ]
           }

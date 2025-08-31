@@ -119,6 +119,22 @@ class CCheckpointApp {
   }
 
   async loadInitialData() {
+    // Show loading state in projects table if currently in projects view
+    if (this.currentView === 'projects') {
+      const tbody = document.getElementById('projects-tbody');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-row">
+              <div class="empty-state">
+                <div class="empty-text">Loading projects...</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+    
     try {
       console.log('📊 Loading initial data...');
       const response = await fetch('/api/stats', {
@@ -142,6 +158,23 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error loading initial data:', error);
       this.showToast('Failed to load data', 'error');
+      
+      // Show error state in projects table if currently in projects view
+      if (this.currentView === 'projects') {
+        const tbody = document.getElementById('projects-tbody');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-row">
+                <div class="empty-state">
+                  <div class="empty-text">Failed to load projects</div>
+                  <div class="empty-subtext">Please refresh the page to try again</div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+      }
     }
   }
 
@@ -300,7 +333,7 @@ class CCheckpointApp {
         e.stopPropagation();
         const projectPath = btn.dataset.projectPath;
         const projectName = btn.dataset.projectName;
-        this.confirmDeleteProject(projectPath, projectName);
+        this.confirmDeleteProject(projectPath, projectName, btn);
       });
     });
   }
@@ -313,6 +346,22 @@ class CCheckpointApp {
   }
 
   async loadProjectCheckpoints(projectPath) {
+    // Switch to checkpoints view and show loading state
+    this.showView('checkpoints');
+    const tbody = document.getElementById('checkpoints-tbody');
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="empty-row">
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-text">Loading checkpoints...</div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+    
     try {
       console.log(`📋 Loading checkpoints for: ${projectPath}`);
       
@@ -327,7 +376,6 @@ class CCheckpointApp {
       
       if (result.success) {
         this.projectCheckpoints = result.data || [];
-        this.showView('checkpoints');
         this.renderCheckpointsView();
         console.log(`✅ Loaded ${this.projectCheckpoints.length} checkpoints`);
       } else {
@@ -336,6 +384,21 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error loading project checkpoints:', error);
       this.showToast('Failed to load checkpoints', 'error');
+      
+      // Show error state in checkpoints table
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-row">
+              <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <div class="empty-text">Failed to load checkpoints</div>
+                <div class="empty-subtext">Please try again or go back to projects</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
     }
   }
 
@@ -845,11 +908,11 @@ class CCheckpointApp {
     return checkpointIndex < this.projectCheckpoints.length - 1;
   }
 
-  confirmDeleteProject(projectPath, projectName) {
+  confirmDeleteProject(projectPath, projectName, buttonElement = null) {
     this.showModal(
       'Delete Project Checkpoints',
       `Are you sure you want to delete all checkpoints for "${projectName}"? This action cannot be undone.`,
-      () => this.deleteProject(projectPath, projectName)
+      () => this.deleteProject(projectPath, projectName, buttonElement)
     );
   }
 
@@ -861,7 +924,12 @@ class CCheckpointApp {
     );
   }
 
-  async deleteProject(projectPath, projectName) {
+  async deleteProject(projectPath, projectName, buttonElement = null) {
+    // Set loading state for specific delete button if provided
+    if (buttonElement) {
+      this.setButtonLoading(buttonElement, true, 'Deleting...');
+    }
+    
     try {
       console.log(`🗑️ Deleting project: ${projectName}`);
       
@@ -889,10 +957,18 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error deleting project:', error);
       this.showToast('Failed to delete project checkpoints', 'error');
+    } finally {
+      // Remove loading state regardless of success/failure
+      if (buttonElement) {
+        this.setButtonLoading(buttonElement, false);
+      }
     }
   }
 
   async clearAllCheckpoints() {
+    // Set loading state for Clear All button
+    this.setButtonLoading('#clear-all-btn', true, '🗑️ Clearing...');
+    
     try {
       console.log('🗑️ Clearing all checkpoints from all projects...');
       
@@ -917,6 +993,9 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error clearing all checkpoints:', error);
       this.showToast('Failed to clear all checkpoints', 'error');
+    } finally {
+      // Remove loading state regardless of success/failure
+      this.setButtonLoading('#clear-all-btn', false);
     }
   }
 
@@ -931,6 +1010,9 @@ class CCheckpointApp {
   }
 
   async deleteCheckpoint(checkpointId) {
+    // Set loading state for all delete checkpoint buttons
+    this.setButtonLoading('#delete-checkpoint-btn', true, '🗑️ Deleting...');
+    
     try {
       console.log(`🗑️ Deleting checkpoint: ${checkpointId}`);
       
@@ -954,11 +1036,17 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error deleting checkpoint:', error);
       this.showToast('Failed to delete checkpoint', 'error');
+    } finally {
+      // Remove loading state regardless of success/failure
+      this.setButtonLoading('#delete-checkpoint-btn', false);
     }
   }
 
   async restoreCheckpoint() {
     if (!this.selectedCheckpoint) return;
+    
+    // Set loading state for all restore buttons
+    this.setButtonLoading('#restore-btn', true, '🔄 Restoring...');
     
     try {
       console.log(`🔄 Restoring checkpoint: ${this.selectedCheckpoint.id}`);
@@ -970,7 +1058,7 @@ class CCheckpointApp {
       const result = await response.json();
       
       if (result.success) {
-        this.showToast(`Restored ${result.data.filesRestored} files successfully!`, 'success');
+        this.showToast('Restored files successfully!', 'success');
         console.log('✅ Checkpoint restored successfully');
       } else {
         throw new Error(result.error || 'Failed to restore checkpoint');
@@ -978,6 +1066,9 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error restoring checkpoint:', error);
       this.showToast('Failed to restore checkpoint', 'error');
+    } finally {
+      // Remove loading state regardless of success/failure
+      this.setButtonLoading('#restore-btn', false);
     }
   }
 
@@ -1372,6 +1463,41 @@ class CCheckpointApp {
     }, duration);
   }
 
+  // Button Loading State Management
+  setButtonLoading(buttonSelector, isLoading, loadingText = null) {
+    const buttons = typeof buttonSelector === 'string' ? 
+      document.querySelectorAll(buttonSelector) : [buttonSelector];
+    
+    buttons.forEach(button => {
+      if (!button) return;
+      
+      if (isLoading) {
+        // Store original text if not already stored
+        if (!button.dataset.originalText) {
+          button.dataset.originalText = button.textContent;
+        }
+        
+        // Apply loading state
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        if (loadingText) {
+          button.textContent = loadingText;
+        }
+      } else {
+        // Remove loading state
+        button.classList.remove('loading');
+        button.disabled = false;
+        
+        // Restore original text
+        if (button.dataset.originalText) {
+          button.textContent = button.dataset.originalText;
+          delete button.dataset.originalText;
+        }
+      }
+    });
+  }
+
   // Utility functions
   formatFileSize(bytes) {
     if (!bytes || bytes === 0) return '0 B';
@@ -1584,6 +1710,9 @@ class CCheckpointApp {
 
     const previousCheckpoint = this.projectCheckpoints[currentIndex + 1];
 
+    // Set loading state for all diff buttons
+    this.setButtonLoading('#diff-btn', true, '📊 Loading...');
+    
     try {
       console.log(`📊 Getting diff between ${this.selectedCheckpoint.id} and ${previousCheckpoint.id}`);
       
@@ -1606,6 +1735,9 @@ class CCheckpointApp {
     } catch (error) {
       console.error('Error getting checkpoint diff:', error);
       this.showToast('Failed to load checkpoint diff', 'error');
+    } finally {
+      // Remove loading state regardless of success/failure
+      this.setButtonLoading('#diff-btn', false);
     }
   }
 

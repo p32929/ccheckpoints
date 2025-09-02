@@ -1,11 +1,12 @@
 {
   "name": "ccheckpoints",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Checkpoint system for Claude Code CLI - Track and visualize your coding sessions with automatic checkpoint creation",
   "main": "dist/cli.js",
   "type": "module",
   "bin": {
-    "ccheckpoints": "./dist/cli.js"
+    "ccheckpoints": "./dist/cli.js",
+    "ccp": "./dist/cli.js"
   },
   "preferGlobal": true,
   "files": [

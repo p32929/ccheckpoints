@@ -14,9 +14,11 @@ npm install -g ccheckpoints
 
 # Run (auto-setup + open dashboard)
 ccheckpoints
+# or use the short alias
+ccp
 ```
 
-That's it! Running `ccheckpoints` will:
+That's it! Running `ccheckpoints` (or `ccp`) will:
 1. ✅ Auto-setup Claude Code hooks (if not already done)
 2. ✅ Start the background server
 3. ✅ Open the dashboard in your browser
@@ -33,29 +35,39 @@ That's it! Running `ccheckpoints` will:
 ### Just run it!
 ```bash
 ccheckpoints
+# or
+ccp
 ```
 This does everything - sets up hooks if needed and opens the dashboard.
 
 ### Manual setup (optional)
 ```bash
 ccheckpoints setup
+# or
+ccp setup
 ```
 Only needed if you want to setup without opening the dashboard.
 
 ### Show dashboard
 ```bash
 ccheckpoints show
+# or
+ccp show
 ```
 Same as running just `ccheckpoints` - opens the dashboard (with auto-setup if needed).
 
 ### Help
 ```bash
 ccheckpoints --help
+# or
+ccp --help
 ```
 
 ### Verbose mode
 ```bash
 ccheckpoints --verbose
+# or
+ccp --verbose
 ```
 See detailed logs of what's happening behind the scenes.
 

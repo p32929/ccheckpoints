@@ -2,6 +2,10 @@
 
 A checkpoint system for Claude Code CLI that automatically tracks your coding sessions. Inspired by Cursor IDE's checkpoint feature - see everything you've done with Claude Code CLI and navigate through your conversation history.
 
+On npm: **[ccheckpoints](https://www.npmjs.com/package/ccheckpoints)**
+
+<img width="1920" height="922" alt="CCheckpoints session dashboard" src="https://github.com/user-attachments/assets/506ce9f8-54aa-4ac3-8605-5404c2f0e017" />
+
 ## What is CCheckpoints?
 
 CCheckpoints hooks into Claude Code CLI to automatically save checkpoints every time you interact with Claude Code CLI. It creates a timeline of your entire coding session that you can view in a beautiful web dashboard.
@@ -170,29 +174,33 @@ Your feedback means a lot - thank you for using CCheckpoints!
 
 ## License
 
-```
-MIT License
+MIT License — Copyright (c) 2025 Fayaz Bin Salam. See [LICENSE](LICENSE) for the full text.
 
-Copyright (c) 2025 Fayaz Bin Salam
+## Contributing
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Contributions are warmly welcomed and greatly appreciated! Whether it's a bug fix, new feature, or improvement, your input helps make this project better for everyone.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Before submitting a pull request, please:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+1. Create an issue describing the feature or bug fix you'd like to work on
+2. Wait for discussion and approval to ensure alignment with project goals
+3. Fork the repository and create your feature branch
+4. Submit your pull request with a clear description of changes
+
+This approach helps avoid duplicate efforts and ensures smooth collaboration. Thank you for considering contributing!
+
+## Share
+
+Sharing this repository with your friends is just one click away from here
+
+[![facebook](https://user-images.githubusercontent.com/6418354/179013321-ac1d1452-0689-493f-9066-940cf2302b6e.png)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/p32929/ccheckpoints/)
+[![twitter](https://user-images.githubusercontent.com/6418354/179013351-7d8d6d1c-4ce2-46ab-bef8-4c4765a1b888.png)](https://twitter.com/intent/tweet?url=https://github.com/p32929/ccheckpoints/)
+[![tumblr](https://user-images.githubusercontent.com/6418354/179013343-3111f55a-3b90-40c7-8487-9777348672b0.png)](https://www.tumblr.com/share?v=3&u=https://github.com/p32929/ccheckpoints/)
+[![pocket](https://user-images.githubusercontent.com/6418354/179013334-b095c45f-becf-49f4-9ee1-5a731a9b1f85.png)](https://getpocket.com/save?url=https://github.com/p32929/ccheckpoints/)
+[![pinterest](https://user-images.githubusercontent.com/6418354/179013331-44cd9206-11b1-4b65-becb-5863b61c828f.png)](https://pinterest.com/pin/create/button/?url=https://github.com/p32929/ccheckpoints/)
+[![reddit](https://user-images.githubusercontent.com/6418354/179013338-7416ae3f-73ba-4522-86e1-1374d7082d22.png)](https://www.reddit.com/submit?url=https://github.com/p32929/ccheckpoints/)
+[![linkedin](https://user-images.githubusercontent.com/6418354/179013327-ca7b7102-1da8-4b1c-858f-1a6e5f21bd70.png)](https://www.linkedin.com/shareArticle?mini=true&url=https://github.com/p32929/ccheckpoints/)
+[![whatsapp](https://user-images.githubusercontent.com/6418354/179013353-f477fa0b-3e6f-4138-a357-c9991b23ff88.png)](https://api.whatsapp.com/send?text=https://github.com/p32929/ccheckpoints/)
 
 ---
 

@@ -1,238 +1,110 @@
 # CCheckpoints
 
-A checkpoint system for Claude Code CLI that automatically tracks your coding sessions. Inspired by Cursor IDE's checkpoint feature - see everything you've done with Claude Code CLI and navigate through your conversation history.
+Cursor-style checkpoints for Claude Code CLI. Every message you send to Claude Code is saved as a checkpoint, and a local web dashboard shows your whole session as a timeline, so you can look back at any point and see what changed.
 
 On npm: **[ccheckpoints](https://www.npmjs.com/package/ccheckpoints)**
 
 <img width="1920" height="922" alt="CCheckpoints session dashboard" src="https://github.com/user-attachments/assets/506ce9f8-54aa-4ac3-8605-5404c2f0e017" />
 
-## What is CCheckpoints?
+## Why use it
 
-CCheckpoints hooks into Claude Code CLI to automatically save checkpoints every time you interact with Claude Code CLI. It creates a timeline of your entire coding session that you can view in a beautiful web dashboard.
+In a long Claude Code session it is easy to lose track of what you asked and when things changed. Cursor has checkpoints for this; Claude Code CLI does not. CCheckpoints adds them by itself, with no change to how you work, and everything stays on your computer.
 
-## Quick Start
+## Features
+
+1. **Automatic checkpoints:** every message you send to Claude Code is saved, with the time.
+2. **All your sessions:** see when each one started, how long it ran and what happened in it.
+3. **Checkpoint timeline:** move through your whole conversation with its full context.
+4. **Compare changes:** see what changed between two checkpoints, to find what broke or how your code grew.
+5. **One-command setup:** it adds the Claude Code hooks for you and opens the dashboard.
+6. **Stays on your computer:** everything is saved in a local SQLite database.
+
+## Quick start
 
 ```bash
-# Install globally
 npm install -g ccheckpoints
-
-# Run (auto-setup + open dashboard)
 ccheckpoints
-# or use the short alias
-ccp
 ```
 
-That's it! Running `ccheckpoints` (or `ccp`) will:
-1. ✅ Auto-setup Claude Code hooks (if not already done)
-2. ✅ Start the background server
-3. ✅ Open the dashboard in your browser
+You can also type the short name `ccp`. The first run does three things:
 
-## How It Works
-
-1. **Automatic Tracking**: Every time you send a message to Claude Code CLI, CCheckpoints saves it as a checkpoint
-2. **Background Server**: Runs quietly at `http://127.0.0.1:9271` to handle tracking
-3. **Web Dashboard**: Beautiful interface to see all your checkpoints and sessions
-4. **SQLite Database**: All data stored locally in `%APPDATA%/CCheckpoints/`
+1. Adds the Claude Code hooks, if they are not there yet.
+2. Starts a small background server at `http://127.0.0.1:9271`.
+3. Opens the dashboard in your browser.
 
 ## Commands
 
-### Just run it!
-```bash
-ccheckpoints
-# or
-ccp
-```
-This does everything - sets up hooks if needed and opens the dashboard.
-
-### Manual setup (optional)
-```bash
-ccheckpoints setup
-# or
-ccp setup
-```
-Only needed if you want to setup without opening the dashboard.
-
-### Show dashboard
-```bash
-ccheckpoints show
-# or
-ccp show
-```
-Same as running just `ccheckpoints` - opens the dashboard (with auto-setup if needed).
-
-### Help
-```bash
-ccheckpoints --help
-# or
-ccp --help
-```
-
-### Verbose mode
-```bash
-ccheckpoints --verbose
-# or
-ccp --verbose
-```
-See detailed logs of what's happening behind the scenes.
-
-## What Gets Tracked?
-
-- **Every message you send to Claude Code CLI** (submit event)
-- **Session stops** (when you exit Claude Code)
-- **Timestamps** for everything
-- **Full conversation context**
+1. `ccheckpoints` (or `ccp`): set up if needed and open the dashboard.
+2. `ccheckpoints setup`: only add the hooks, without opening the dashboard.
+3. `ccheckpoints show`: open the dashboard.
+4. `ccheckpoints --verbose`: show detailed logs of what is happening.
+5. `ccheckpoints --help`: show all options.
 
 ## Screenshots
 
-### 📊 Session Overview
-Get a bird's-eye view of all your Claude Code CLI sessions. See when you started, how long you worked, and track your productivity patterns.
+### Sessions
+
+See all your Claude Code sessions: when you started and how long you worked.
 
 <img width="1920" height="922" alt="Session Dashboard" src="https://github.com/user-attachments/assets/506ce9f8-54aa-4ac3-8605-5404c2f0e017" />
 
-### 🎯 Checkpoint Timeline
-Every message you send to Claude Code CLI is saved as a checkpoint. Navigate through your entire conversation history with timestamps and full context.
+### Checkpoint timeline
+
+Every message is a checkpoint. Move through the whole conversation with times and full context.
 
 <img width="1920" height="922" alt="Checkpoint Timeline" src="https://github.com/user-attachments/assets/6e26588b-a983-4ff7-96c7-e820734e62c3" />
 
-### 🔍 Compare Changes
-See exactly what changed between checkpoints. Perfect for debugging when something breaks or understanding how your code evolved.
+### Compare changes
+
+See exactly what changed between checkpoints.
 
 <img width="1920" height="922" alt="Diff View" src="https://github.com/user-attachments/assets/3d0a72cf-da43-4b81-b797-eef0c5aa2086" />
 
-## File Locations
+## How it works
 
-- **Windows**: `%APPDATA%/CCheckpoints/`
-- **Mac/Linux**: `~/.ccheckpoints/`
+1. `ccheckpoints setup` adds two hooks to your Claude Code settings: `userPromptSubmit` (when you send a message) and `stop` (when a session ends).
+2. Each hook runs `ccheckpoints track --event=<type>`, which sends the event to the background server on port 9271.
+3. The server saves it in the local database, and the dashboard reads from there.
 
-Contains:
-- `checkpoints.db` - SQLite database with all your data
-- `logs/` - Debug logs (when using --verbose)
+## Where your data is
 
-## For Developers
+Your data is in a `CCheckpoints` folder, in the file `checkpoints.db`:
 
-### Build from source
-
-```bash
-# Clone repo
-git clone https://github.com/p32929/ccheckpoints.git
-cd ccheckpoints
-
-# Install deps
-npm install
-
-# Build
-npm run build
-
-# install globally
-npm install -g .
-
-# Now use it
-ccheckpoints
-```
-
-### Development mode
-
-```bash
-npm run dev         # Run without building
-npm run dev:watch   # Auto-reload on changes
-```
-
-## How the Hook System Works
-
-When you run `ccheckpoints setup`, it adds these hooks to your Claude Code config:
-
-- `userPromptSubmit` → Tracks when you send a message
-- `stop` → Tracks when session ends
-
-The hooks call `ccheckpoints track --event=<type>` which sends the data to the background server running on port 9271.
+1. Windows: `%APPDATA%\CCheckpoints\`
+2. macOS: `~/Library/Application Support/CCheckpoints/`
+3. Linux: `~/.local/share/CCheckpoints/`
 
 ## Troubleshooting
 
-### Port 9271 already in use?
-The background server needs port 9271. If it's busy, close other apps using it.
+1. **Port 9271 is already in use:** the server needs this port, so close the other app using it.
+2. **The dashboard does not open:** run `ccheckpoints --verbose` to see what is going on.
+3. **Checkpoints are not being saved:** run `ccheckpoints setup` again to add the hooks.
 
-### Dashboard won't open?
-Make sure the server is running. Try `ccheckpoints --verbose` to see what's happening.
+## Build it yourself
 
-### Hooks not working?
-Run setup again:
 ```bash
-ccheckpoints setup
+git clone https://github.com/p32929/ccheckpoints.git
+cd ccheckpoints
+npm install
+npm run build
+npm install -g .
+ccheckpoints
 ```
 
-### See detailed logs
-```bash
-ccheckpoints --verbose
-```
-Check logs in `%APPDATA%/CCheckpoints/logs/`
-
-## Found Something?
-
-If you find a bug or have an idea, feel free to open an issue! I'd be happy to discuss and see what we can do about it together.
-
-Your feedback means a lot - thank you for using CCheckpoints!
+While working on it, `npm run dev` runs it without building, and `npm run dev:watch` reloads on every change.
 
 ## License
 
-MIT License — Copyright (c) 2025 Fayaz Bin Salam. See [LICENSE](LICENSE) for the full text.
+MIT License, Copyright (c) 2025 Fayaz Bin Salam. See [LICENSE](LICENSE) for the full text.
 
 ## Contributing
 
-Contributions are warmly welcomed and greatly appreciated! Whether it's a bug fix, new feature, or improvement, your input helps make this project better for everyone.
-
-Before submitting a pull request, please:
-
-1. Create an issue describing the feature or bug fix you'd like to work on
-2. Wait for discussion and approval to ensure alignment with project goals
-3. Fork the repository and create your feature branch
-4. Submit your pull request with a clear description of changes
-
-This approach helps avoid duplicate efforts and ensures smooth collaboration. Thank you for considering contributing!
+Contributions are very welcome, thank you! Before you start on a pull request, please open an issue and tell me what you would like to add or change. That way we can agree on it first, and your time is not spent on something that might not fit. Found a bug or have an idea? An issue is the best place for that too.
 
 ## Share
 
-Sharing this repository with your friends is just one click away from here
-
-[![facebook](https://user-images.githubusercontent.com/6418354/179013321-ac1d1452-0689-493f-9066-940cf2302b6e.png)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/p32929/ccheckpoints/)
-[![twitter](https://user-images.githubusercontent.com/6418354/179013351-7d8d6d1c-4ce2-46ab-bef8-4c4765a1b888.png)](https://twitter.com/intent/tweet?url=https://github.com/p32929/ccheckpoints/)
-[![tumblr](https://user-images.githubusercontent.com/6418354/179013343-3111f55a-3b90-40c7-8487-9777348672b0.png)](https://www.tumblr.com/share?v=3&u=https://github.com/p32929/ccheckpoints/)
-[![pocket](https://user-images.githubusercontent.com/6418354/179013334-b095c45f-becf-49f4-9ee1-5a731a9b1f85.png)](https://getpocket.com/save?url=https://github.com/p32929/ccheckpoints/)
-[![pinterest](https://user-images.githubusercontent.com/6418354/179013331-44cd9206-11b1-4b65-becb-5863b61c828f.png)](https://pinterest.com/pin/create/button/?url=https://github.com/p32929/ccheckpoints/)
-[![reddit](https://user-images.githubusercontent.com/6418354/179013338-7416ae3f-73ba-4522-86e1-1374d7082d22.png)](https://www.reddit.com/submit?url=https://github.com/p32929/ccheckpoints/)
-[![linkedin](https://user-images.githubusercontent.com/6418354/179013327-ca7b7102-1da8-4b1c-858f-1a6e5f21bd70.png)](https://www.linkedin.com/shareArticle?mini=true&url=https://github.com/p32929/ccheckpoints/)
-[![whatsapp](https://user-images.githubusercontent.com/6418354/179013353-f477fa0b-3e6f-4138-a357-c9991b23ff88.png)](https://api.whatsapp.com/send?text=https://github.com/p32929/ccheckpoints/)
-
----
+<a href="https://p32929.github.io/share/?repo=ccheckpoints"><img src="https://p32929.github.io/readme/share.svg" alt="Share this with your friends in just a click" width="420"></a>
 
 ## Support
 
-If this saved you time, you can buy me a coffee — it keeps these projects maintained and free.
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/p32929)
-
-**Sponsor a mention** — $499 one-time: your name + link in this section for 3 months. **$1,200 one-time:** featured placement at the top of this section, plus a pinned mention on [my X profile](https://x.com/p32929), for 3 months. Email **[fayazdevinbox@uberip.com](mailto:fayazdevinbox@uberip.com)** for an invoice.
-
-<!-- kit-block -->
-
----
-
-## Using Claude Code CLI for real work?
-
-I put together the **[Claude Code Starter Kit](https://p32929.github.io/claude-code-starter-kit/)** — tested `.claude/` subagents, slash commands and guard hooks (blocks `rm -rf` and `.env` reads) that install in 60 seconds. Free Lite version on GitHub, or the full kit plus a done-for-you Team ($999) / Enterprise ($1,499) rollout across your repos.
-
-<!-- hire-block -->
-
----
-
-## 💼 Using this at a company?
-
-I do fixed-price delivery work on my own projects. One invoice, one date, no hourly billing:
-
-| | |
-|---|---|
-| **White-label build** — this project rebranded, extended and deployed as yours | **$6,500** · 3 weeks |
-| **Custom app from scratch** on my own stack, signed and auto-updating | **$12,500** · 6 weeks |
-| **Production-hardening sprint** — 72 hours on this project, for your load and your security review | **$999** |
-| **Ongoing capacity** — one project-week of my time reserved every month | **$9,000 / month** |
-
-Full details → **[p32929.github.io/hire](https://p32929.github.io/hire/)** · Email **[fayazdevinbox@uberip.com](mailto:fayazdevinbox@uberip.com)** — scoping and quotes are free and I answer within one business day.
+<a href="https://p32929.github.io/support/"><img src="https://p32929.github.io/readme/support.svg" alt="If you like my works and want to support me, feel free to support" width="420"></a>
